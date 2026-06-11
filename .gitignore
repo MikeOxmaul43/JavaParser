@@ -5,3 +5,4 @@ cmake-build-*/
 CMakeLists.txt.user
 temp/
 compile_commands.json
+tests/integration/outputs/
