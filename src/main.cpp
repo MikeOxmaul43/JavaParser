@@ -5,7 +5,9 @@
 
 #include "errors/errors.h"
 #include "io/file_reader.h"
-
+#include "io/file_writer.h"
+#include "io/dot_generator.h"
+#include "parser/parser.h"
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +30,14 @@ int main(int argc, char *argv[])
             qCritical().noquote() << errorMessage(e);
             return 1;
     }
-    
+
+    Parser parser;
+    QList<ClassInfo> classes = parser.parse(text);
+
+    FileWriter writer(args[2]);
+    writer.writeAll(classes);
+
+    DotGenerator dotGen(args[2]);
+    dotGen.generate(classes);
     return 0;
 }

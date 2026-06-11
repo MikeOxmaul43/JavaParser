@@ -18,6 +18,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Test)
 
 set(COMMON_SOURCES
     ${PROJECT_SOURCE_DIR}/src/parser/parser.cpp
+    ${PROJECT_SOURCE_DIR}/src/errors/errors.cpp
+    ${PROJECT_SOURCE_DIR}/src/io/file_writer.cpp
+    ${PROJECT_SOURCE_DIR}/src/io/file_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/io/dot_generator.cpp
 )
 
 add_executable(KNPO_Java_Parser
