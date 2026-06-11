@@ -306,10 +306,18 @@ ClassInfo Parser::parseClass(const QStringList &modifiers, const QString &outerC
     
     // 8. ПОКА следующее слово не }
     while (peekWord() != "}" && !atEnd()) {
+        // Пропустить аннотации
+        while (peekChar() == '@')
+            skipAnnotation();
+        
         // Читать модификаторы
         QStringList mods;
         while (isModifier(peekWord()))
             mods << readWord();
+
+        // Пропустить аннотации
+        while (peekChar() == '@')
+            skipAnnotation();
 
         QString w = peekWord();
         if (w.isEmpty() || w == "}") break;
@@ -659,5 +667,20 @@ void Parser::parseEnum(ClassInfo &ci)
         }
         // это константа — просто запоминаем имя
         ci.enumConstants << w;
+    }
+}
+
+void Parser::skipAnnotation()
+{
+    readWord(); // "@"
+    readWord(); // имя аннотации
+    if (peekChar() == '(') {
+        readWord(); // "("
+        int d = 1;
+        while (d > 0 && !atEnd()) {
+            QString t = readWord();
+            if      (t == "(") ++d;
+            else if (t == ")") --d;
+        }
     }
 }

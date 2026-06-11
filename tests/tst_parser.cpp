@@ -269,6 +269,27 @@ private slots:
         QCOMPARE(ci.fields.size(), 2);
         QCOMPARE(ci.methods.size(), 1);
     }
+
+    // 2-21 Аннотация без параметров на классе
+        void t121_annotationOnClass() {
+            PARSE_FIRST("@Override class A {}");
+            QCOMPARE(ci.name, QString("A"));
+            QCOMPARE(ci.type, ClassType::CLASS);
+        }
+    
+        // 2-22 Аннотация с параметром на классе
+        void t122_annotationWithParamOnClass() {
+            PARSE_FIRST("@SuppressWarnings(\"unchecked\") public class A {}");
+            QCOMPARE(ci.name, QString("A"));
+            QVERIFY(ci.modifiers.contains("public"));
+        }
+    
+        // 2-23 Несколько аннотаций перед классом
+        void t123_multipleAnnotationsOnClass() {
+            PARSE_FIRST("@Deprecated @SuppressWarnings(\"all\") public class Foo {}");
+            QCOMPARE(ci.name, QString("Foo"));
+            QVERIFY(ci.modifiers.contains("public"));
+        }
 };
 
 // ════════════════════════════════════════════════════════════════════════════
