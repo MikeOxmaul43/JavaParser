@@ -5,7 +5,7 @@
 
 #include <QtTest/QtTest>
 #include <QCoreApplication>
-#include "../src/parser/parser.h"
+#include "../../src/parser/parser.h"
 
 /// Разобрать строку и взять первый класс
 #define PARSE_FIRST(src) \

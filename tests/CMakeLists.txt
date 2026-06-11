@@ -1,5 +1,5 @@
 add_executable(tst_parser
-    tst_parser.cpp
+    unit/tst_parser.cpp
     ${COMMON_SOURCES}
 )
 
