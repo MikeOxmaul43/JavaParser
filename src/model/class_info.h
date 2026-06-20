@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит описание класса для программы Java Source Code Parser
+*/
 #pragma once
 #include <QString>
 #include <QStringList>
@@ -10,7 +14,7 @@
 /**
  * @brief Тип Java-сущности.
  */
-enum class ClassType 
+enum class ClassType
 {
     CLASS,
     INTERFACE,

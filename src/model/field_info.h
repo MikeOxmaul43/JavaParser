@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит описание поля для программы Java Source Code Parser
+*/
 #pragma once
 #include <QString>
 #include <QStringList>
