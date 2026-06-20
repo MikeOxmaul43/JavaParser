@@ -149,7 +149,27 @@ QString Parser::peekWord()
 QChar Parser::peekChar() const
 {
     int p = m_pos;
-    while (p < m_text.size() && m_text[p].isSpace()) ++p;
+    for (;;) {
+        while (p < m_text.size() && m_text[p].isSpace()) ++p;
+
+        if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '/') {
+            p += 2;
+            while (p < m_text.size() && m_text[p] != '\n') ++p;
+            continue;
+        }
+
+        if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '*') {
+            p += 2;
+            while (p + 1 < m_text.size() &&
+                   !(m_text[p] == '*' && m_text[p + 1] == '/'))
+                ++p;
+            p = (p + 1 < m_text.size()) ? p + 2 : m_text.size();
+            continue;
+        }
+
+        break;
+    }
+
     if (p < m_text.size()) return m_text[p];
     return {};
 }
@@ -216,7 +236,7 @@ QList<ClassInfo> Parser::parse(const QString &text)
 
 
 ClassInfo Parser::parseClass(const QStringList &modifiers, const QString &outerClass)
-{    
+{
     // 1-2.
     ClassInfo ci;
     ci.modifiers   = modifiers;
@@ -252,18 +272,18 @@ ClassInfo Parser::parseClass(const QStringList &modifiers, const QString &outerC
 
     // 7. Прочитать {
     readWord(); // "{"
-    
+
     if (ci.type == ClassType::ENUM) {
         parseEnum(ci);
         return ci;
     }
-    
+
     // 8. ПОКА следующее слово не }
     while (peekWord() != "}" && !atEnd()) {
         // Пропустить аннотации
         while (peekChar() == '@')
             skipAnnotation();
-        
+
         // Читать модификаторы
         QStringList mods;
         while (isModifier(peekWord()))
