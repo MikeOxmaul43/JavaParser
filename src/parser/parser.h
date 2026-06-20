@@ -1,7 +1,11 @@
-#pragma once 
-#include <QString> 
-#include <QStringList> 
-#include <QList> 
+/*!
+* \file
+* \brief Данный файл содержит заголовки класса и методов парсера для программы Java Source Code Parser
+*/
+#pragma once
+#include <QString>
+#include <QStringList>
+#include <QList>
 #include "../model/class_info.h"
 
 

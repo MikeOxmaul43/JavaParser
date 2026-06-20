@@ -1,3 +1,8 @@
+/*!
+* \file
+* \brief Данный файл содержит заголовки класса и методов DotGen для программы Java Source Code Parser
+*/
+
 #pragma once
 
 #include <QString>

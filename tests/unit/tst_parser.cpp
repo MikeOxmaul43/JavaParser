@@ -1,3 +1,8 @@
+/*!
+* \file
+* \brief Данный файл содержит тесты для класса parser.
+*/
+
 /**
  * Модульные тесты для Parser
  * Приложения 1–9 из документа «Программа и методика испытаний»
@@ -276,14 +281,14 @@ private slots:
             QCOMPARE(ci.name, QString("A"));
             QCOMPARE(ci.type, ClassType::CLASS);
         }
-    
+
         // 2-22 Аннотация с параметром на классе
         void t122_annotationWithParamOnClass() {
             PARSE_FIRST("@SuppressWarnings(\"unchecked\") public class A {}");
             QCOMPARE(ci.name, QString("A"));
             QVERIFY(ci.modifiers.contains("public"));
         }
-    
+
         // 2-23 Несколько аннотаций перед классом
         void t123_multipleAnnotationsOnClass() {
             PARSE_FIRST("@Deprecated @SuppressWarnings(\"all\") public class Foo {}");

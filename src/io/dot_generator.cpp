@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит реализацию класса и методов DotGen для программы Java Source Code Parser
+*/
 #include "dot_generator.h"
 
 #include <QDir>

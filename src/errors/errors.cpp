@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит возможные ошибки для программы Java Source Code Parser
+*/
 #include "errors.h"
 
 QString errorMessage(AppError e) {
@@ -19,5 +23,3 @@ QString errorMessage(AppError e) {
     }
     return {};
 }
-
-

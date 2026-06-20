@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит заголовки класса и методов FileWriter для программы Java Source Code Parser
+*/
 #pragma once
 
 #include <QString>

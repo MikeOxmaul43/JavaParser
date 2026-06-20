@@ -1,3 +1,8 @@
+/*!
+* \file
+* \brief Данный файл содержит возможные ошибки для программы Java Source Code Parser
+*/
+
 #pragma once
 #include <QtGlobal>
 #include <QString>

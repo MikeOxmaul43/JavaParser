@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит реализацию класса и методов FileWriter для программы Java Source Code Parser
+*/
 #include "file_writer.h"
 
 #include <QDir>

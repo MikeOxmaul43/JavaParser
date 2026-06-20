@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит реализацию класса и методов парсера для программы Java Source Code Parser
+*/
 #include "parser.h"
 #include <QtCore/qstring.h>
 

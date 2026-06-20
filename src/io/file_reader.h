@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит заголовки методов file_reader для программы Java Source Code Parser
+*/
 #pragma once
 #include <QFile>
 #include <QTextStream>

@@ -1,3 +1,7 @@
+/*!
+* \file
+* \brief Данный файл содержит реализацию методов file_reader для программы Java Source Code Parser
+*/
 #include "file_reader.h"
 
 QString readInputFile(const QString &path, QSet<AppError> &errors)
