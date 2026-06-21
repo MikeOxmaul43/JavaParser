@@ -23,3 +23,22 @@ QString errorMessage(AppError e) {
     }
     return {};
 }
+
+
+/**
+ * @brief Вычисляет хеш-код для значения AppError.
+ *
+ * Позволяет использовать AppError в контейнерах Qt,
+ * основанных на хеш-таблицах, таких как QHash и QSet.
+ *
+ * @param e Значение перечисления.
+ * @param seed Начальное значение хеша.
+ * @return Вычисленный хеш.
+ */
+Q_DECL_CONST_FUNCTION Q_DECL_CONSTEXPR uint qHash(
+    AppError e,
+    uint seed = 0
+) noexcept
+{
+    return static_cast<uint>(e) ^ seed;
+}
