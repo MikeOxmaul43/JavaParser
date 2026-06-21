@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>JavaParser: C:/Users/Leo/Desktop/knpo/JavaParser/src/errors/errors.h Source File</title>
+<title>Java_Parser: C:/Users/Leo/Desktop/knpo/JavaParser/src/errors/errors.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">JavaParser
+   <div id="projectname">Java_Parser
    </div>
   </td>
  </tr>
@@ -140,18 +140,9 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('errors_8h_sour
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>};</div>
 </div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span></div>
-<div class="foldopen" id="foldopen00041" data-start="{" data-end="}">
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="errors_8h.html#ad4a918ac5efccd0a3fde93915cf56ad1">   41</a></span>Q_DECL_CONST_FUNCTION Q_DECL_CONSTEXPR uint <a class="code hl_function" href="errors_8h.html#ad4a918ac5efccd0a3fde93915cf56ad1">qHash</a>(</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    <a class="code hl_enumeration" href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4">AppError</a> e,</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    uint seed = 0</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>) noexcept</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>{</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>uint<span class="keyword">&gt;</span>(e) ^ seed;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>}</div>
-</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>QString <a class="code hl_function" href="errors_8h.html#a202d1689e0de9fc7e1a419d908527d45">errorMessage</a>(<a class="code hl_enumeration" href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4">AppError</a> e);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>QString <a class="code hl_function" href="errors_8h.html#a202d1689e0de9fc7e1a419d908527d45">errorMessage</a>(<a class="code hl_enumeration" href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4">AppError</a> e);</div>
 <div class="ttc" id="aerrors_8h_html_a202d1689e0de9fc7e1a419d908527d45"><div class="ttname"><a href="errors_8h.html#a202d1689e0de9fc7e1a419d908527d45">errorMessage</a></div><div class="ttdeci">QString errorMessage(AppError e)</div><div class="ttdoc">Возвращает текстовое описание ошибки.</div><div class="ttdef"><b>Definition</b> errors.cpp:7</div></div>
 <div class="ttc" id="aerrors_8h_html_a8cf712863a35fbee5581383d63df0fc4"><div class="ttname"><a href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4">AppError</a></div><div class="ttdeci">AppError</div><div class="ttdoc">Типы ошибок приложения.</div><div class="ttdef"><b>Definition</b> errors.h:20</div></div>
 <div class="ttc" id="aerrors_8h_html_a8cf712863a35fbee5581383d63df0fc4a23df1e208ac1358e3a8994ce74648c9c"><div class="ttname"><a href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4a23df1e208ac1358e3a8994ce74648c9c">AppError::FileEmpty</a></div><div class="ttdeci">@ FileEmpty</div><div class="ttdoc">Файл пуст.</div><div class="ttdef"><b>Definition</b> errors.h:26</div></div>
@@ -161,7 +152,6 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('errors_8h_sour
 <div class="ttc" id="aerrors_8h_html_a8cf712863a35fbee5581383d63df0fc4ab0c1830c2c01f75b252784232316d97e"><div class="ttname"><a href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4ab0c1830c2c01f75b252784232316d97e">AppError::TooManyLines</a></div><div class="ttdeci">@ TooManyLines</div><div class="ttdoc">Количество строк превышает допустимый предел.</div><div class="ttdef"><b>Definition</b> errors.h:22</div></div>
 <div class="ttc" id="aerrors_8h_html_a8cf712863a35fbee5581383d63df0fc4ac37fe26610bf4c6bcb010246fa0d9d67"><div class="ttname"><a href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4ac37fe26610bf4c6bcb010246fa0d9d67">AppError::LineTooLong</a></div><div class="ttdeci">@ LineTooLong</div><div class="ttdoc">Длина строки превышает допустимый предел.</div><div class="ttdef"><b>Definition</b> errors.h:21</div></div>
 <div class="ttc" id="aerrors_8h_html_a8cf712863a35fbee5581383d63df0fc4aebb7014cb91102db2f1a7af17d25f969"><div class="ttname"><a href="errors_8h.html#a8cf712863a35fbee5581383d63df0fc4aebb7014cb91102db2f1a7af17d25f969">AppError::TooManyArgs</a></div><div class="ttdeci">@ TooManyArgs</div><div class="ttdoc">Передано слишком много аргументов.</div><div class="ttdef"><b>Definition</b> errors.h:27</div></div>
-<div class="ttc" id="aerrors_8h_html_ad4a918ac5efccd0a3fde93915cf56ad1"><div class="ttname"><a href="errors_8h.html#ad4a918ac5efccd0a3fde93915cf56ad1">qHash</a></div><div class="ttdeci">Q_DECL_CONST_FUNCTION Q_DECL_CONSTEXPR uint qHash(AppError e, uint seed=0) noexcept</div><div class="ttdoc">Вычисляет хеш-код для значения AppError.</div><div class="ttdef"><b>Definition</b> errors.h:41</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

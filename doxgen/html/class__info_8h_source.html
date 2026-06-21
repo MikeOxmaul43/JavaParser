@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>JavaParser: C:/Users/Leo/Desktop/knpo/JavaParser/src/model/class_info.h Source File</title>
+<title>Java_Parser: C:/Users/Leo/Desktop/knpo/JavaParser/src/model/class_info.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="codefolding.js"></script>
 <script type="text/javascript" src="clipboard.js"></script>
@@ -30,7 +30,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">JavaParser
+   <div id="projectname">Java_Parser
    </div>
   </td>
  </tr>
@@ -118,49 +118,55 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('class__info_8h
   <div class="headertitle"><div class="title">class_info.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#include &lt;QString&gt;</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;QStringList&gt;</span></div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;QList&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;method_info.h&quot;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;field_info.h&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">enum class</span> ClassType </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>{</div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>    CLASS,</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    INTERFACE,</div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    ENUM,</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>};</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span></div>
-<div class="foldopen" id="foldopen00025" data-start="{" data-end="};">
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="struct_class_info.html">   25</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_class_info.html">ClassInfo</a></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>{</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    QString name;</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    ClassType type;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    QString packageName;</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    QString outerClass;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    QStringList modifiers;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    QString extendsClass;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    QStringList implementsList;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    QList&lt;FieldInfo&gt; fields;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    QList&lt;MethodInfo&gt; methods;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    QList&lt;MethodInfo&gt; constructors;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    QList&lt;ClassInfo&gt; nestedClasses;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    QStringList enumConstants;</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>};</div>
+<a href="class__info_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#pragma once</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;QString&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;QStringList&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;QList&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;<a class="code" href="method__info_8h.html">method_info.h</a>&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;<a class="code" href="field__info_8h.html">field_info.h</a>&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span></div>
+<div class="foldopen" id="foldopen00017" data-start="{" data-end="};">
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="class__info_8h.html#a92f93237c843e4b3fff7b7cc4c80f415">   17</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="class__info_8h.html#a92f93237c843e4b3fff7b7cc4c80f415">ClassType</a></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>{</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    CLASS,</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    INTERFACE,</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    ENUM,</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>};</div>
 </div>
-<div class="ttc" id="astruct_class_info_html"><div class="ttname"><a href="struct_class_info.html">ClassInfo</a></div><div class="ttdoc">Полное описание Java-класса, интерфейса или enum.</div><div class="ttdef"><b>Definition</b> class_info.h:26</div></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span></div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="struct_class_info.html">   29</a></span><span class="keyword">struct </span><a class="code hl_struct" href="struct_class_info.html">ClassInfo</a></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    QString name;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <a class="code hl_enumeration" href="class__info_8h.html#a92f93237c843e4b3fff7b7cc4c80f415">ClassType</a> type;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    QString packageName;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    QString outerClass;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    QStringList modifiers;</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    QString extendsClass;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    QStringList implementsList;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    QList&lt;FieldInfo&gt; fields;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    QList&lt;MethodInfo&gt; methods;</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    QList&lt;MethodInfo&gt; constructors;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    QList&lt;ClassInfo&gt; nestedClasses;</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    QStringList enumConstants;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>
+</div>
+<div class="ttc" id="aclass__info_8h_html_a92f93237c843e4b3fff7b7cc4c80f415"><div class="ttname"><a href="class__info_8h.html#a92f93237c843e4b3fff7b7cc4c80f415">ClassType</a></div><div class="ttdeci">ClassType</div><div class="ttdoc">Тип Java-сущности.</div><div class="ttdef"><b>Definition</b> class_info.h:18</div></div>
+<div class="ttc" id="afield__info_8h_html"><div class="ttname"><a href="field__info_8h.html">field_info.h</a></div><div class="ttdoc">Данный файл содержит описание поля для программы Java Source Code Parser.</div></div>
+<div class="ttc" id="amethod__info_8h_html"><div class="ttname"><a href="method__info_8h.html">method_info.h</a></div><div class="ttdoc">Данный файл содержит описание метода и конструктора для программы Java Source Code Parser.</div></div>
+<div class="ttc" id="astruct_class_info_html"><div class="ttname"><a href="struct_class_info.html">ClassInfo</a></div><div class="ttdoc">Полное описание Java-класса, интерфейса или enum.</div><div class="ttdef"><b>Definition</b> class_info.h:30</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>Users</b></li><li class="navelem"><b>Leo</b></li><li class="navelem"><b>Desktop</b></li><li class="navelem"><b>knpo</b></li><li class="navelem"><b>JavaParser</b></li><li class="navelem"><b>src</b></li><li class="navelem"><b>model</b></li><li class="navelem"><b>class_info.h</b></li>
+    <li class="navelem"><b>Users</b></li><li class="navelem"><b>Leo</b></li><li class="navelem"><b>Desktop</b></li><li class="navelem"><b>knpo</b></li><li class="navelem"><b>JavaParser</b></li><li class="navelem"><b>src</b></li><li class="navelem"><b>model</b></li><li class="navelem"><a href="class__info_8h.html">class_info.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
   </ul>
 </div>
