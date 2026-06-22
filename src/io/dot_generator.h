@@ -97,8 +97,37 @@ private:
      */
     static QString nodeId(const ClassInfo &ci);
 
+    /*!
+     * Добавляет секцию полей класса в HTML-таблицу DOT-узла.
+     *
+     * Для каждого поля отображает имя, тип и модификаторы
+     * static/final (если присутствуют).
+     *
+     * Если список полей пуст, секция не создаётся.
+     *
+     * \param[in,out] rows — формируемые строки HTML-таблицы
+     * \param[in] ci       — описание класса
+     */
     void appendFieldsSection(QStringList &rows, const ClassInfo &ci);
 
+
+    /*!
+     * Добавляет секцию методов или конструкторов в HTML-таблицу DOT-узла.
+     *
+     * Формирует список сигнатур с параметрами. В зависимости от
+     * переданных флагов может отображать возвращаемый тип и
+     * модификаторы static/abstract.
+     *
+     * Если список методов пуст, секция не создаётся.
+     *
+     * \param[in,out] rows         — формируемые строки HTML-таблицы
+     * \param[in] sectionName      — название секции ("methods",
+     *                               "constructors" и т.п.)
+     * \param[in] methods          — список методов или конструкторов
+     * \param[in] showReturnType   — выводить возвращаемый тип
+     * \param[in] showModifiers    — выводить модификаторы
+     *                               static и abstract
+     */
     void appendMethodSection(QStringList &rows,
                              const QString &sectionName,
                              const QList<MethodInfo> &methods,

@@ -167,6 +167,7 @@ QString DotGenerator::nodeId(const ClassInfo &ci)
 {
      // Генерируем уникальный идентификатор для узла:
     QString id;
+     // если класс вложенный, добавляем префикс с именем внешнего класса, разделённый "__"
     if (!ci.outerClass.isEmpty())
         id = ci.outerClass + "__" + ci.name;
     else
@@ -186,6 +187,7 @@ void DotGenerator::appendMethodSection(
     bool showReturnType,
     bool showModifiers)
 {
+    //если методов или конструкторов нет - выходим
     if (methods.isEmpty())
         return;
 
@@ -193,6 +195,7 @@ void DotGenerator::appendMethodSection(
         "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>%1</i></TD></TR>")
                 .arg(sectionName);
 
+    // Цикл для каждого метода/конструктора
     for (const MethodInfo &mi : methods) {
 
         // параметры
@@ -204,9 +207,11 @@ void DotGenerator::appendMethodSection(
             escapeHtml(mi.name) +
             "(" + paramStrs.join(", ") + ")";
 
+        //если перед нами метод
         if (showReturnType)
             sig += " : " + escapeHtml(mi.returnType);
 
+        ////если перед нами метод
         if (showModifiers) {
             if (mi.isAbstract)
                 sig = "<i>" + sig + "</i>";
@@ -221,12 +226,13 @@ void DotGenerator::appendMethodSection(
 
 void DotGenerator::appendFieldsSection(QStringList &rows, const ClassInfo &ci)
 {
+    //Если полей нет - выход
     if (ci.fields.isEmpty())
         return;
 
     // ── Секция: поля ──────────────────────────
     rows << "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>fields</i></TD></TR>";
-
+    // Для каждого поля
     for (const FieldInfo &fi : ci.fields) {
         QString mods;
 

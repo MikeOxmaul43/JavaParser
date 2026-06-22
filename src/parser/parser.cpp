@@ -7,11 +7,13 @@
 
 bool Parser::atEnd() const
 {
+    //проверяет находимся ли в конце текста
     return m_pos >= m_text.size();
 }
 
 bool Parser::isClassKeyword(const QString &w)
 {
+    //является ли слово объявлением класс(интерфейс, перечисление)
     return w == "class" || w == "interface" || w == "enum";
 }
 
