@@ -5,6 +5,7 @@
 #include "errors.h"
 
 QString errorMessage(AppError e) {
+    //Перевод Enum значения в текстовый формат
     switch (e) {
     case AppError::LineTooLong:
         return "Превышена максимально допустимая длина строки (1024 символа).";
@@ -21,6 +22,7 @@ QString errorMessage(AppError e) {
     case AppError::TooManyArgs:
         return "Неверное количество параметров командной строки. Ожидается два параметра.";
     }
+    //Если ошибка не найденна - пустая строка
     return {};
 }
 
