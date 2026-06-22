@@ -281,35 +281,7 @@ ClassInfo Parser::parseClass(const QStringList &modifiers, const QString &outerC
     }
 
     // 8. ПОКА следующее слово не }
-    while (peekWord() != "}" && !atEnd()) {
-        // Пропустить аннотации
-        while (peekChar() == '@')
-            skipAnnotation();
-
-        // Читать модификаторы
-        QStringList mods;
-        while (isModifier(peekWord()))
-            mods << readWord();
-
-        // Пропустить аннотации
-        while (peekChar() == '@')
-            skipAnnotation();
-
-        QString w = peekWord();
-        if (w.isEmpty() || w == "}") break;
-
-        if (isClassKeyword(w)) {
-            // Разобрать вложенный класс, добавить в список вложенных
-            ci.nestedClasses << parseClass(mods, ci.name);
-        } else if (w == "{") {
-            // ИНАЧЕ ЕСЛИ следующее слово — открывающая фигурная скобка
-            // (статический / экземплярный инициализатор — пропускаем)
-            skipBody();
-        } else {
-            // Определить и разобрать поле, метод или конструктор
-            parseMember(ci, mods);
-        }
-    }
+    parseClassBody(ci);
 
     // 9. Прочитать }
     readWord(); // "}"
@@ -608,13 +580,15 @@ void Parser::skipQuotedLiteral(QChar terminator)
 
 void Parser::skipComment()
 {
+    // Если в конце - выход
     if (atEnd())
         return;
-
+    //если это начало однотсрочного комментария - пропустить его
     if (m_text[m_pos] == '/') {
         ++m_pos;
         skipLineComment();
     }
+    //если это начало многостроного комментария - пропустить его
     else if (m_text[m_pos] == '*') {
         ++m_pos;
         skipBlockComment();
@@ -623,19 +597,58 @@ void Parser::skipComment()
 
 void Parser::processBodyChar(QChar c, int &depth)
 {
+    // Если открывающая фигурная скобка - увеличить глубину
     if (c == '{') {
         ++depth;
     }
+    // Если закрывающая фигурная скобка - кменьшить глубину
     else if (c == '}') {
         --depth;
     }
+    // Пропуск строкового литерала
     else if (c == '"') {
         skipQuotedLiteral('"');
     }
+    // Пропуск строкового литерала
     else if (c == '\'') {
         skipQuotedLiteral('\'');
     }
+    // Пропуск комментария
     else if (c == '/') {
         skipComment();
+    }
+}
+
+
+void Parser::parseClassBody(ClassInfo &ci)
+{
+    while (peekWord() != "}" && !atEnd()) {
+
+        // Пропустить аннотации
+        while (peekChar() == '@')
+            skipAnnotation();
+
+        // Читать модификаторы
+        QStringList mods;
+        while (isModifier(peekWord()))
+            mods << readWord();
+
+        // Пропустить аннотации
+        while (peekChar() == '@')
+            skipAnnotation();
+
+        QString w = peekWord();
+        if (w.isEmpty() || w == '}')
+            break;
+
+        if (isClassKeyword(w)) {
+            ci.nestedClasses << parseClass(mods, ci.name);
+        }
+        else if (w == "{") {
+            skipBody();
+        }
+        else {
+            parseMember(ci, mods);
+        }
     }
 }
