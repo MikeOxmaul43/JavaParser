@@ -115,6 +115,7 @@ void FileWriter::writeField(const FieldInfo &fi, const QString &fieldsDir)
     out << "name: " << fi.name << "\n";
     out << "type: " << fi.type << "\n";
 
+    // Записываем модификаторы поля.
     if (!fi.modifiers.isEmpty())
         out << "modifiers: " << fi.modifiers.join(' ') << "\n";
 
@@ -161,6 +162,7 @@ void FileWriter::writeMethod(const MethodInfo &mi, const QString &methodsDir)
     out << "name: "       << mi.name       << "\n";
     out << "returnType: " << mi.returnType << "\n";
 
+    // Записываем модификаторы метода
     if (!mi.modifiers.isEmpty())
         out << "modifiers: " << mi.modifiers.join(' ') << "\n";
 
@@ -194,6 +196,7 @@ void FileWriter::writeConstructor(const MethodInfo &mi, const QString &ctorsDir)
     // поэтому сохраняем только имя, модификаторы и параметры.
     out << "name: " << mi.name << "\n";
 
+    // Записываем модификаторы конструктора
     if (!mi.modifiers.isEmpty())
         out << "modifiers: " << mi.modifiers.join(' ') << "\n";
 

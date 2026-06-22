@@ -26,55 +26,61 @@ bool Parser::isModifier(const QString &w)
 
 
 
-// Пропустить все пробелы и переносы строк
 void Parser::skipSpaces()
 {
+    // Пропускает все пробельные символы с текущей позиции m_pos
     while (!atEnd() && m_text[m_pos].isSpace())
         ++m_pos;
 }
 
-// Пропустить строку до конца  (// комментарий)
 void Parser::skipLineComment()
 {
+    // Пропускает однострочный комментарий (начиная с "//" до конца строки).
+    // Предполагается, что текущая позиция уже стоит на символе после "//".
     while (!atEnd() && m_text[m_pos] != '\n')
         ++m_pos;
 }
 
-// Пропустить всё до */  (вызывается когда уже прочитали /*)
 void Parser::skipBlockComment()
 {
+    // Пропускает многострочный комментарий (/* ... */).
+    // Предполагается, что текущая позиция уже после "/*".
+    // Останавливается на закрывающей последовательности "*/", сдвигая позицию за неё.
     while (!atEnd()) {
         if (m_text[m_pos] == '*' &&
             m_pos + 1 < m_text.size() &&
             m_text[m_pos + 1] == '/') {
-            m_pos += 2;
+            m_pos += 2; // перешагиваем через "*/"
             return;
         }
         ++m_pos;
     }
 }
 
-// Пропустить тело { } считая глубину вложенности
 void Parser::skipBody()
 {
+    // Пропускаем пробелы перед возможной открывающей скобкой
     skipSpaces();
+
+    // Если есть '{' - переходим за неё, иначе выходим (тела нет)
     if (!atEnd() && m_text[m_pos] == '{')
         ++m_pos;
     else
         return;
 
+    // текущая глубина вложенности
     int depth = 1;
     while (!atEnd() && depth > 0) {
         QChar c = m_text[m_pos++];
-        if      (c == '{') ++depth;
-        else if (c == '}') --depth;
-        else if (c == '"') {
+        if      (c == '{') ++depth;           // углубляемся
+        else if (c == '}') --depth;           // выходим из вложенности
+        else if (c == '"') {                 // начало строкового литерала
             while (!atEnd()) {
                 QChar sc = m_text[m_pos++];
-                if      (sc == '\\') { if (!atEnd()) ++m_pos; }
+                if      (sc == '\\') { if (!atEnd()) ++m_pos; } // экранированный символ - пропуск
                 else if (sc == '"')  break;
             }
-        } else if (c == '\'') {
+        } else if (c == '\'') { // начало символьного литерала
             while (!atEnd()) {
                 QChar sc = m_text[m_pos++];
                 if      (sc == '\\') { if (!atEnd()) ++m_pos; }
@@ -87,9 +93,9 @@ void Parser::skipBody()
     }
 }
 
-// Пропустить всё до ; включительно
 void Parser::skipToSemicolon()
 {
+    // Пропускает все символы до ближайшей точки с запятой (включительно).
     while (!atEnd() && m_text[m_pos] != ';')
         ++m_pos;
     if (!atEnd()) ++m_pos;
@@ -149,50 +155,57 @@ QString Parser::peekWord()
     return w;
 }
 
-// Следующий непробельный символ без сдвига позиции
 QChar Parser::peekChar() const
 {
-    int p = m_pos;
+    int p = m_pos;  // локальная копия позиции — не меняем состояние парсера
     for (;;) {
+        // Пропускаем все пробельные символы
         while (p < m_text.size() && m_text[p].isSpace()) ++p;
 
+        // Проверяем однострочный комментарий "//"
         if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '/') {
             p += 2;
+            // Идём до конца строки (или до конца текста)
             while (p < m_text.size() && m_text[p] != '\n') ++p;
-            continue;
+            continue;  // после пропуска комментария возвращаемся к циклу
         }
 
+        // Проверяем многострочный комментарий "/* ... */"
         if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '*') {
             p += 2;
+            // Ищем закрывающую последовательность "*/"
             while (p + 1 < m_text.size() &&
-                   !(m_text[p] == '*' && m_text[p + 1] == '/'))
-                ++p;
-            p = (p + 1 < m_text.size()) ? p + 2 : m_text.size();
-            continue;
+                    !(m_text[p] == '*' && m_text[p + 1] == '/'))
+                    ++p;
+                // Перемещаем p за "*/", если нашли, иначе в конец
+                p = (p + 1 < m_text.size()) ? p + 2 : m_text.size();
+                continue;
+            }
+
+            break;  // найден значимый символ или конец текста
         }
 
-        break;
-    }
-
-    if (p < m_text.size()) return m_text[p];
-    return {};
+        if (p < m_text.size()) return m_text[p];
+        return {};
 }
 
 void Parser::parsePackage()
 {
     QString name;
     QString tok;
+    // Читаем слова, пока не встретим ';' или пока не закончатся токены
     while ((tok = readWord()) != ";" && !tok.isEmpty())
-        name += tok;
-    m_package = name;
+        name += tok;          // добавляем прочитанное слово к имени
+     m_package = name;         // сохраняем результат
 }
 
 
 void Parser::skipImports()
 {
+    // Пока следующий токен — "import", обрабатываем одну директиву
     while (peekWord() == "import") {
-        readWord(); // "import"
-        skipToSemicolon();
+        readWord();          // съедаем "import"
+        skipToSemicolon();   // пропускаем остаток до ';'
     }
 }
 

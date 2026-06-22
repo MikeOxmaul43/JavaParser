@@ -16,10 +16,12 @@ DotGenerator::DotGenerator(const QString &outputDir)
 
 void DotGenerator::generate(const QList<ClassInfo> &classes)
 {
+    // Очищаем внутренние данные перед генерацией нового графа
     m_lines.clear();
     m_nodeCount = 0;
     m_edgeCount = 0;
 
+    // Открывающая строка DOT-графа
     m_lines << "digraph {";
 
     // Узлы — верхний уровень и их вложенные классы
@@ -29,15 +31,16 @@ void DotGenerator::generate(const QList<ClassInfo> &classes)
             buildNode(nested);
     }
 
-    // Рёбра
+    // После того как все узлы созданы, строим рёбра между ними
     buildAllEdges(classes);
 
+    // Закрывающая строка графа и статистика
     m_lines << "}";
     m_lines << QString("// Total nodes: %1, total edges: %2")
                    .arg(m_nodeCount)
                    .arg(m_edgeCount);
 
-    // Запись файла
+    // Создаём выходную директорию, если её нет, и записываем файл
     QDir().mkpath(m_outputDir);
     QFile file(m_outputDir + QDir::separator() + "structure.dot");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -53,24 +56,28 @@ void DotGenerator::generate(const QList<ClassInfo> &classes)
 
 void DotGenerator::buildNode(const ClassInfo &ci)
 {
+     // Формируем уникальный идентификатор узла
     QString id = nodeId(ci);
 
-    // Заголовок: тип + имя класса
+    // Определяем префикс в зависимости от типа класса
     QString typePrefix;
     switch (ci.type) {
         case ClassType::INTERFACE: typePrefix = "&laquo;interface&raquo;<BR/>"; break;
         case ClassType::ENUM:      typePrefix = "&laquo;enum&raquo;<BR/>";      break;
         default: break;
     }
-    // abstract — добавляем курсив
+
+    // Если класс абстрактный, имя выделяем курсивом
     bool isAbstract = ci.modifiers.contains("abstract");
 
+    // Формируем содержимое заголовка: тип + имя
     QString header = typePrefix;
     if (isAbstract)
         header += "<i>" + escapeHtml(ci.name) + "</i>";
     else
         header += "<b>" + escapeHtml(ci.name) + "</b>";
 
+      // Строим строки HTML-таблицы, которая будет помещена в атрибут label узла DOT
     QStringList rows;
     rows << QString("  %1 [label=<<TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\">").arg(id);
 
@@ -136,6 +143,7 @@ void DotGenerator::buildNode(const ClassInfo &ci)
 
 void DotGenerator::buildAllEdges(const QList<ClassInfo> &classes)
 {
+    // Проходим по всем классам верхнего уровня
     for (const ClassInfo &ci : classes) {
         QString from = nodeId(ci);
 
@@ -162,7 +170,7 @@ void DotGenerator::buildAllEdges(const QList<ClassInfo> &classes)
                            .arg(from, nodeId(nested));
             ++m_edgeCount;
 
-            // рекурсия для вложенных
+            // Рекурсивно обрабатываем вложенные классы
             buildAllEdges(QList<ClassInfo>() << nested);
         }
     }
@@ -171,6 +179,7 @@ void DotGenerator::buildAllEdges(const QList<ClassInfo> &classes)
 
 QString DotGenerator::escapeHtml(const QString &s)
 {
+    // Заменяем специальные символы на HTML-сущности, чтобы они корректно отображались в label
     QString result = s;
     result.replace("&", "&amp;");
     result.replace("<", "&lt;");
@@ -182,6 +191,7 @@ QString DotGenerator::escapeHtml(const QString &s)
 
 QString DotGenerator::nodeId(const ClassInfo &ci)
 {
+     // Генерируем уникальный идентификатор для узла:
     QString id;
     if (!ci.outerClass.isEmpty())
         id = ci.outerClass + "__" + ci.name;

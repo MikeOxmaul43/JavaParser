@@ -32,7 +32,7 @@ enum class AppError
 /**
  * @brief Возвращает текстовое описание ошибки.
  *
- * @param e Код ошибки.
+ * @param[in] e Код ошибки.
  * @return Локализованное сообщение об ошибке.
  */
 QString errorMessage(AppError e);
