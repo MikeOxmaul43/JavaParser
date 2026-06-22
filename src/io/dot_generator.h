@@ -96,4 +96,12 @@ private:
      * \return       — уникальный идентификатор узла
      */
     static QString nodeId(const ClassInfo &ci);
+
+    void appendFieldsSection(QStringList &rows, const ClassInfo &ci);
+
+    void appendMethodSection(QStringList &rows,
+                             const QString &sectionName,
+                             const QList<MethodInfo> &methods,
+                             bool showReturnType,
+                             bool showModifiers);
 };

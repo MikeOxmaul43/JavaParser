@@ -10,6 +10,7 @@
 
 DotGenerator::DotGenerator(const QString &outputDir)
     : m_outputDir(outputDir)
+    //Конструктор для DotGenerator
 {
 }
 
@@ -56,15 +57,20 @@ void DotGenerator::generate(const QList<ClassInfo> &classes)
 
 void DotGenerator::buildNode(const ClassInfo &ci)
 {
-     // Формируем уникальный идентификатор узла
+    // Формируем уникальный идентификатор узла
     QString id = nodeId(ci);
 
     // Определяем префикс в зависимости от типа класса
     QString typePrefix;
     switch (ci.type) {
-        case ClassType::INTERFACE: typePrefix = "&laquo;interface&raquo;<BR/>"; break;
-        case ClassType::ENUM:      typePrefix = "&laquo;enum&raquo;<BR/>";      break;
-        default: break;
+        case ClassType::INTERFACE:
+            typePrefix = "&laquo;interface&raquo;<BR/>";
+            break;
+        case ClassType::ENUM:
+            typePrefix = "&laquo;enum&raquo;<BR/>";
+            break;
+        default:
+            break;
     }
 
     // Если класс абстрактный, имя выделяем курсивом
@@ -77,62 +83,30 @@ void DotGenerator::buildNode(const ClassInfo &ci)
     else
         header += "<b>" + escapeHtml(ci.name) + "</b>";
 
-      // Строим строки HTML-таблицы, которая будет помещена в атрибут label узла DOT
+    // Строим строки HTML-таблицы, которая будет помещена в атрибут label узла DOT
     QStringList rows;
-    rows << QString("  %1 [label=<<TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\">").arg(id);
+    rows << QString(
+        "  %1 [label=<<TABLE BORDER=\"1\" CELLBORDER=\"1\" CELLSPACING=\"0\">")
+                .arg(id);
 
     // ── Секция: имя класса ────────────────────
     rows << QString("    <TR><TD><b>%1</b></TD></TR>").arg(header);
 
-    // ── Секция: поля ──────────────────────────
-    if (!ci.fields.isEmpty()) {
-        // разделитель секций
-        rows << "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>fields</i></TD></TR>";
-        for (const FieldInfo &fi : ci.fields) {
-            QString mods;
-            if (fi.isStatic && fi.isFinal)      mods = "{static final} ";
-            else if (fi.isStatic)               mods = "{static} ";
-            else if (fi.isFinal)                mods = "{final} ";
+    appendFieldsSection(rows, ci);
 
-            QString line = escapeHtml(mods + fi.name + " : " + fi.type);
-            rows << QString("    <TR><TD ALIGN=\"LEFT\">%1</TD></TR>").arg(line);
-        }
-    }
+    appendMethodSection(
+        rows,
+        "methods",
+        ci.methods,
+        true,   // показывать возвращаемый тип
+        true);  // показывать static/abstract
 
-    // ── Секция: методы ────────────────────────
-    if (!ci.methods.isEmpty()) {
-        rows << "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>methods</i></TD></TR>";
-        for (const MethodInfo &mi : ci.methods) {
-            // параметры
-            QStringList paramStrs;
-            for (const ParamInfo &p : mi.params)
-                paramStrs << escapeHtml(p.name + " : " + p.type);
-
-            QString sig = escapeHtml(mi.name) +
-                          "(" + paramStrs.join(", ") + ")" +
-                          " : " + escapeHtml(mi.returnType);
-
-            if (mi.isAbstract) sig = "<i>" + sig + "</i>";
-            if (mi.isStatic)   sig = "{static} " + sig;
-
-            rows << QString("    <TR><TD ALIGN=\"LEFT\">%1</TD></TR>").arg(sig);
-        }
-    }
-
-    // ── Секция: конструкторы ──────────────────
-    if (!ci.constructors.isEmpty()) {
-        rows << "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>constructors</i></TD></TR>";
-        for (const MethodInfo &mi : ci.constructors) {
-            QStringList paramStrs;
-            for (const ParamInfo &p : mi.params)
-                paramStrs << escapeHtml(p.name + " : " + p.type);
-
-            QString sig = escapeHtml(mi.name) +
-                          "(" + paramStrs.join(", ") + ")";
-
-            rows << QString("    <TR><TD ALIGN=\"LEFT\">%1</TD></TR>").arg(sig);
-        }
-    }
+    appendMethodSection(
+        rows,
+        "constructors",
+        ci.constructors,
+        false,  // конструкторы не имеют возвращаемого типа
+        false); // модификаторы не отображаем
 
     rows << "  </TABLE>>];";
 
@@ -201,4 +175,70 @@ QString DotGenerator::nodeId(const ClassInfo &ci)
     id.replace('.', '_');
     id.replace(' ', '_');
     return id;
+}
+
+
+
+void DotGenerator::appendMethodSection(
+    QStringList &rows,
+    const QString &sectionName,
+    const QList<MethodInfo> &methods,
+    bool showReturnType,
+    bool showModifiers)
+{
+    if (methods.isEmpty())
+        return;
+
+    rows << QString(
+        "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>%1</i></TD></TR>")
+                .arg(sectionName);
+
+    for (const MethodInfo &mi : methods) {
+
+        // параметры
+        QStringList paramStrs;
+        for (const ParamInfo &p : mi.params)
+            paramStrs << escapeHtml(p.name + " : " + p.type);
+
+        QString sig =
+            escapeHtml(mi.name) +
+            "(" + paramStrs.join(", ") + ")";
+
+        if (showReturnType)
+            sig += " : " + escapeHtml(mi.returnType);
+
+        if (showModifiers) {
+            if (mi.isAbstract)
+                sig = "<i>" + sig + "</i>";
+
+            if (mi.isStatic)
+                sig = "{static} " + sig;
+        }
+
+        rows << QString("    <TR><TD ALIGN=\"LEFT\">%1</TD></TR>").arg(sig);
+    }
+}
+
+void DotGenerator::appendFieldsSection(QStringList &rows, const ClassInfo &ci)
+{
+    if (ci.fields.isEmpty())
+        return;
+
+    // ── Секция: поля ──────────────────────────
+    rows << "    <TR><TD BGCOLOR=\"#DDDDDD\"><i>fields</i></TD></TR>";
+
+    for (const FieldInfo &fi : ci.fields) {
+        QString mods;
+
+        if (fi.isStatic && fi.isFinal)
+            mods = "{static final} ";
+        else if (fi.isStatic)
+            mods = "{static} ";
+        else if (fi.isFinal)
+            mods = "{final} ";
+
+        QString line = escapeHtml(mods + fi.name + " : " + fi.type);
+
+        rows << QString("    <TR><TD ALIGN=\"LEFT\">%1</TD></TR>").arg(line);
+    }
 }
