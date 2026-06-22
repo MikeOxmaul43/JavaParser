@@ -92,43 +92,28 @@ QString Parser::readWord()
     // Точный набор одиночных символов из спецификации
     static const QString singles = "{}()[],;=@.";
 
-    for (;;) {
-        // 1. пропустить пробелы
-        skipSpaces();
+    // Пропустить неважные символы
+    skipIgnored();
 
-        // 2. конец текста
-        if (atEnd()) return {};
+    // если в конце то ничего не возвращаем
+    if (atEnd())
+        return {};
 
-        // 3. однострочный комментарий
-        if (m_text[m_pos] == '/' &&
-            m_pos + 1 < m_text.size() &&
-            m_text[m_pos + 1] == '/') {
-            m_pos += 2;
-            skipLineComment();
-            continue;  // ВЕРНУТЬ readWord() — рекурсия через цикл
-        }
+    // одиночный символ-токен
+    if (singles.contains(m_text[m_pos]))
+        return QString(m_text[m_pos++]);
 
-        // 4. блочный комментарий
-        if (m_text[m_pos] == '/' &&
-            m_pos + 1 < m_text.size() &&
-            m_text[m_pos + 1] == '*') {
-            m_pos += 2;
-            skipBlockComment();
-            continue;  // ВЕРНУТЬ readWord() — рекурсия через цикл
-        }
+    // обычное слово
+    QString word;
 
-        // 5. одиночный символ-токен
-        if (singles.contains(m_text[m_pos]))
-            return QString(m_text[m_pos++]);
-
-        // 6. обычное слово
-        QString word;
-        while (!atEnd() &&
-               !m_text[m_pos].isSpace() &&
-               !singles.contains(m_text[m_pos]))
-            word += m_text[m_pos++];
-        return word;
+    while (!atEnd() &&
+           !m_text[m_pos].isSpace() &&
+           !singles.contains(m_text[m_pos]))
+    {
+        word += m_text[m_pos++];
     }
+
+    return word;
 }
 
 // Заглянуть вперёд без движения позиции
@@ -143,37 +128,31 @@ QString Parser::peekWord()
 QChar Parser::peekChar() const
 {
     int p = m_pos;  // локальная копия позиции — не меняем состояние парсера
-    for (;;) {
-        // Пропускаем все пробельные символы
-        while (p < m_text.size() && m_text[p].isSpace()) ++p;
 
-        // Проверяем однострочный комментарий "//"
-        if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '/') {
+    while (p < m_text.size()) {
+
+        // Пропускаем пробелы
+        skipSpaces(p);
+
+        // Пропускаем однострочный комментарий
+        if (isLineComment(p)) {
             p += 2;
-            // Идём до конца строки (или до конца текста)
-            while (p < m_text.size() && m_text[p] != '\n') ++p;
-            continue;  // после пропуска комментария возвращаемся к циклу
+            skipLineComment(p);
+            continue;
         }
 
-        // Проверяем многострочный комментарий "/* ... */"
-        if (p + 1 < m_text.size() && m_text[p] == '/' && m_text[p + 1] == '*') {
+        // Пропускаем многострочный комментарий
+        if (isBlockComment(p)) {
             p += 2;
-            // Ищем закрывающую последовательность "*/"
-            while (p + 1 < m_text.size() &&
-                    !(m_text[p] == '*' && m_text[p + 1] == '/'))
-                    ++p;
-                // Перемещаем p за "*/", если нашли, иначе в конец
-                p = (p + 1 < m_text.size()) ? p + 2 : m_text.size();
-                continue;
-            }
-
-            break;  // найден значимый символ или конец текста
+            skipBlockComment(p);
+            continue;
         }
 
-        if (p < m_text.size()) return m_text[p];
-        return {};
+        return (p < m_text.size()) ? m_text[p] : QChar{};
+    }
+
+    return {};
 }
-
 void Parser::parsePackage()
 {
     QString name;
@@ -449,19 +428,9 @@ QList<ParamInfo> Parser::parseParams()
     // 4. ПОКА следующий символ не )
     while (peekChar() != ')' && !atEnd()) {
 
-        // ЕСЛИ следующий символ @ → прочитать и пропустить аннотацию
+        // ЕСЛИ следующий символ @ → пропустить аннотацию
         if (peekChar() == '@') {
-            readWord(); // "@"
-            readWord(); // имя аннотации
-            if (peekChar() == '(') {
-                readWord(); // "("
-                int d = 1;
-                while (d > 0 && !atEnd()) {
-                    QString t = readWord();
-                    if      (t == "(") ++d;
-                    else if (t == ")") --d;
-                }
-            }
+            skipAnnotation();
             continue;
         }
 
@@ -475,31 +444,18 @@ QList<ParamInfo> Parser::parseParams()
         // Прочитать слово → записать как тип параметра
         pi.type = readWord();
 
-        // ПОКА следующий символ [
-        while (peekChar() == '[') {
-            readWord(); // "["
-            readWord(); // "]"
-            pi.type += "[]";
-        }
+        // Прочитать суффиксы массива после типа
+        pi.type += readArraySuffix();
 
-        // ЕСЛИ следующее слово "..."
-        // Примечание: readWord() разбивает "..." на три отдельных токена "."
-        // (т.к. "." входит в список одиночных символов), поэтому читаем три точки
-        if (peekChar() == '.') {
-            readWord(); // "."
-            readWord(); // "."
-            readWord(); // "."
+        // Прочитать varargs (...)
+        if (readVarArgs())
             pi.type += "...";
-        }
 
         // Прочитать слово → записать как имя параметра
         pi.name = readWord();
+
         // Если имя параметра содержит []
-        while (peekChar() == '[') {
-            readWord(); // "["
-            readWord(); // "]"
-            pi.type += "[]";
-        }
+        pi.type += readArraySuffix();
 
         // Добавить параметр в список
         params << pi;
@@ -522,27 +478,21 @@ void Parser::parseEnum(ClassInfo &ci)
     // уже прочитали '{'
     // читаем константы через запятую пока не '}' или ';'
     while (!atEnd()) {
-        QString w = readWord();
-        if (w == "}" || w.isEmpty()) break;
-        if (w == ",") continue;
-        if (w == ";") {
-            // после ';' могут идти обычные члены enum — разбираем их
-            while (peekWord() != "}" && !atEnd()) {
-                QStringList mods;
-                while (isModifier(peekWord()))
-                    mods << readWord();
-                QString peek = peekWord();
-                if (peek.isEmpty() || peek == "}") break;
 
-                if(isClassKeyword(peek)){
-                    ci.nestedClasses << parseClass(mods, ci.name);
-                } else {
-                     parseMember(ci, mods);
-                }
-            }
+        QString w = readWord();
+
+        if (w == "}" || w.isEmpty())
+            break;
+
+        if (w == ",")
+            continue;
+
+        if (w == ";") {
+            parseEnumMembers(ci);
             readWord(); // '}'
             return;
         }
+
         // это константа — просто запоминаем имя
         ci.enumConstants << w;
     }
@@ -650,5 +600,121 @@ void Parser::parseClassBody(ClassInfo &ci)
         else {
             parseMember(ci, mods);
         }
+    }
+}
+void Parser::skipSpaces(int &pos) const
+{
+    // Пропуск пробелов
+    while (pos < m_text.size() && m_text[pos].isSpace())
+        ++pos;
+}
+
+void Parser::skipLineComment(int &pos) const
+{
+    // Пропуск однострочного комментария
+    while (pos < m_text.size() && m_text[pos] != '\n')
+        ++pos;
+}
+
+void Parser::skipBlockComment(int &pos) const
+{
+    // Пропуск многострочного комментария
+    while (pos < m_text.size()) {
+        if (pos + 1 < m_text.size() &&
+            m_text[pos] == '*' &&
+            m_text[pos + 1] == '/') {
+            pos += 2;
+            return;
+        }
+
+        ++pos;
+    }
+}
+
+bool Parser::isLineComment(int pos) const
+{
+    // Проверка что это однострочный комментарий
+    return pos + 1 < m_text.size() &&
+           m_text[pos] == '/' &&
+           m_text[pos + 1] == '/';
+}
+
+bool Parser::isBlockComment(int pos) const
+{
+    // Проверка что это многострочный комментарий
+    return pos + 1 < m_text.size() &&
+           m_text[pos] == '/' &&
+           m_text[pos + 1] == '*';
+}
+
+
+void Parser::skipIgnored()
+{
+    for (;;) {
+
+        skipSpaces();
+
+        if (atEnd())
+            return;
+
+        if (isLineComment(m_pos)) {
+            m_pos += 2;
+            skipLineComment();
+            continue;
+        }
+
+        if (isBlockComment(m_pos)) {
+            m_pos += 2;
+            skipBlockComment();
+            continue;
+        }
+
+        return;
+    }
+}
+
+QString Parser::readArraySuffix()
+{
+    QString suffix;
+
+    while (peekChar() == '[') {
+        readWord(); // "["
+        readWord(); // "]"
+        suffix += "[]";
+    }
+
+    return suffix;
+}
+
+bool Parser::readVarArgs()
+{
+    if (peekChar() != '.')
+        return false;
+
+    readWord(); // "."
+    readWord(); // "."
+    readWord(); // "."
+
+    return true;
+}
+
+void Parser::parseEnumMembers(ClassInfo &ci)
+{
+    while (peekWord() != "}" && !atEnd()) {
+
+        QStringList mods;
+
+        while (isModifier(peekWord()))
+            mods << readWord();
+
+        QString peek = peekWord();
+
+        if (peek.isEmpty() || peek == "}")
+            break;
+
+        if (isClassKeyword(peek))
+            ci.nestedClasses << parseClass(mods, ci.name);
+        else
+            parseMember(ci, mods);
     }
 }
