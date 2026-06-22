@@ -64,35 +64,18 @@ void Parser::skipBody()
     // Пропускаем пробелы перед возможной открывающей скобкой
     skipSpaces();
 
-    // Если есть '{' - переходим за неё, иначе выходим (тела нет)
-    if (!atEnd() && m_text[m_pos] == '{')
-        ++m_pos;
-    else
+    // Если тела нет — выходим
+    if (atEnd() || m_text[m_pos] != '{')
         return;
 
-    // текущая глубина вложенности
+    // Переходим за открывающую скобку
+    ++m_pos;
+
+    // Текущая глубина вложенности
     int depth = 1;
-    while (!atEnd() && depth > 0) {
-        QChar c = m_text[m_pos++];
-        if      (c == '{') ++depth;           // углубляемся
-        else if (c == '}') --depth;           // выходим из вложенности
-        else if (c == '"') {                 // начало строкового литерала
-            while (!atEnd()) {
-                QChar sc = m_text[m_pos++];
-                if      (sc == '\\') { if (!atEnd()) ++m_pos; } // экранированный символ - пропуск
-                else if (sc == '"')  break;
-            }
-        } else if (c == '\'') { // начало символьного литерала
-            while (!atEnd()) {
-                QChar sc = m_text[m_pos++];
-                if      (sc == '\\') { if (!atEnd()) ++m_pos; }
-                else if (sc == '\'') break;
-            }
-        } else if (c == '/' && !atEnd()) {
-            if      (m_text[m_pos] == '/') { ++m_pos; skipLineComment();  }
-            else if (m_text[m_pos] == '*') { ++m_pos; skipBlockComment(); }
-        }
-    }
+
+    while (!atEnd() && depth > 0)
+        processBodyChar(m_text[m_pos++], depth);
 }
 
 void Parser::skipToSemicolon()
@@ -605,5 +588,54 @@ void Parser::skipAnnotation()
             if      (t == "(") ++d;
             else if (t == ")") --d;
         }
+    }
+}
+
+void Parser::skipQuotedLiteral(QChar terminator)
+{
+    while (!atEnd()) {
+        QChar c = m_text[m_pos++];
+
+        if (c == '\\') {
+            if (!atEnd())
+                ++m_pos;
+        }
+        else if (c == terminator) {
+            return;
+        }
+    }
+}
+
+void Parser::skipComment()
+{
+    if (atEnd())
+        return;
+
+    if (m_text[m_pos] == '/') {
+        ++m_pos;
+        skipLineComment();
+    }
+    else if (m_text[m_pos] == '*') {
+        ++m_pos;
+        skipBlockComment();
+    }
+}
+
+void Parser::processBodyChar(QChar c, int &depth)
+{
+    if (c == '{') {
+        ++depth;
+    }
+    else if (c == '}') {
+        --depth;
+    }
+    else if (c == '"') {
+        skipQuotedLiteral('"');
+    }
+    else if (c == '\'') {
+        skipQuotedLiteral('\'');
+    }
+    else if (c == '/') {
+        skipComment();
     }
 }
