@@ -1065,6 +1065,314 @@ public abstract class BaseService extends Object implements Serializable {
         QVERIFY(r[0].implementsList.contains("I1"));
         QVERIFY(r[0].implementsList.contains("I2"));
     }
+
+    void t128_blockCommentInsideMethodBody() {
+            Parser p;
+            auto r = p.parse(
+                "class A {\n"
+                "    void foo() {\n"
+                "        int x = 1; /* блок */ int y = 2;\n"
+                "        /* много\n"
+                "           строк */ int z = 3;\n"
+                "    }\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].methods.size(), 1);
+            QCOMPARE(r[0].methods[0].name, QString("foo"));
+        }
+
+        // 9-29 skipQuotedLiteral -> ветвь c=='\\': экранированный символ в строке внутри тела
+        void t129_escapedCharInMethodBody() {
+            Parser p;
+            auto r = p.parse(
+                "class A {\n"
+                "    void foo() {\n"
+                "        String s = \"hello\\\"world\";\n"
+                "        char c = '\\'';\n"
+                "        String p = \"C:\\\\Users\\\\file.txt\";\n"
+                "    }\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].methods.size(), 1);
+            QCOMPARE(r[0].methods[0].name, QString("foo"));
+        }
+
+        // 9-30 parseClassBody -> ветвь w=="{": голый instance initializer { } в теле класса
+        void t130_instanceInitializerInClassBody() {
+            Parser p;
+            auto r = p.parse(
+                "class A {\n"
+                "    int value;\n"
+                "    {\n"
+                "        value = 42;\n"
+                "    }\n"
+                "    String name;\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].fields.size(), 2);
+            QCOMPARE(r[0].fields[0].name, QString("value"));
+            QCOMPARE(r[0].fields[1].name, QString("name"));
+        }
+
+        // 9-31 parseEnumMembers -> isClassKeyword: вложенный класс в enum после ';'
+        void t131_nestedClassInsideEnumMembers() {
+            Parser p;
+            auto r = p.parse(
+                "enum Status {\n"
+                "    OK, FAIL;\n"
+                "    private int code;\n"
+                "    public int getCode() { return code; }\n"
+                "    public static class Meta {\n"
+                "        private String label;\n"
+                "        public Meta(String label) {}\n"
+                "        public String getLabel() { return label; }\n"
+                "    }\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].enumConstants.size(), 2);
+            QVERIFY(r[0].enumConstants.contains("OK"));
+            QVERIFY(r[0].enumConstants.contains("FAIL"));
+            QCOMPARE(r[0].nestedClasses.size(), 1);
+            QCOMPARE(r[0].nestedClasses[0].name, QString("Meta"));
+        }
+        void t132_lineCommentBeforeParen() {
+            Parser p;
+            auto r = p.parse(
+                "abstract class A {\n"
+                "    void foo // comment\n"
+                "    ();\n"
+                "    int bar // comment\n"
+                "    (int x);\n"
+                "    String baz // comment\n"
+                "    () {\n"
+                "        return null;\n"
+                "    }\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].methods.size(), 3);
+            QCOMPARE(r[0].methods[0].name, QString("foo"));
+            QCOMPARE(r[0].methods[1].name, QString("bar"));
+            QCOMPARE(r[0].methods[2].name, QString("baz"));
+        }
+
+        // 9-33 peekChar() -> ветвь isLineComment: // перед = инициализатором поля
+        void t133_lineCommentBeforeEquals() {
+            Parser p;
+            auto r = p.parse(
+                "class A {\n"
+                "    int x // comment\n"
+                "    = 10;\n"
+                "    String s // comment\n"
+                "    = \"hello\";\n"
+                "    boolean flag // comment\n"
+                "    ;\n"
+                "}\n"
+            );
+            QCOMPARE(r.size(), 1);
+            QCOMPARE(r[0].fields.size(), 3);
+            QCOMPARE(r[0].fields[0].name, QString("x"));
+            QCOMPARE(r[0].fields[1].name, QString("s"));
+            QCOMPARE(r[0].fields[2].name, QString("flag"));
+        }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Приложение 10. Parser::parseClassBody()
+// ════════════════════════════════════════════════════════════════════════════
+class TestParseClassBody : public QObject
+{
+    Q_OBJECT
+private slots:
+
+    // 10-1 Пустое тело класса
+    void t11_emptyBody() {
+        PARSE_FIRST("class A {}");
+        QVERIFY(ci.fields.isEmpty());
+        QVERIFY(ci.methods.isEmpty());
+        QVERIFY(ci.constructors.isEmpty());
+        QVERIFY(ci.nestedClasses.isEmpty());
+    }
+
+    // 10-2 Одно поле
+    void t12_singleField() {
+        PARSE_FIRST("class A { int x; }");
+        QCOMPARE(ci.fields.size(), 1);
+        QCOMPARE(ci.fields[0].name, QString("x"));
+    }
+
+    // 10-3 Один метод
+    void t13_singleMethod() {
+        PARSE_FIRST("class A { void run(){} }");
+        QCOMPARE(ci.methods.size(), 1);
+        QCOMPARE(ci.methods[0].name, QString("run"));
+    }
+
+    // 10-4 Один конструктор
+    void t14_singleConstructor() {
+        PARSE_FIRST("class A { A(){} }");
+        QCOMPARE(ci.constructors.size(), 1);
+        QVERIFY(ci.constructors[0].isConstructor);
+    }
+
+    // 10-5 Несколько полей и методов
+    void t15_multipleFieldsAndMethods() {
+        PARSE_FIRST("class A { int x; String s; void run(){} int sum(){} }");
+        QCOMPARE(ci.fields.size(), 2);
+        QCOMPARE(ci.methods.size(), 2);
+    }
+
+    // 10-6 Аннотация перед членом — парсится без ошибок
+    void t16_annotationBeforeMember() {
+        PARSE_FIRST("class A { @Override void run(){} }");
+        QCOMPARE(ci.methods.size(), 1);
+        QCOMPARE(ci.methods[0].name, QString("run"));
+    }
+
+    // 10-7 Несколько аннотаций перед членом
+    void t17_multipleAnnotationsBeforeMember() {
+        PARSE_FIRST("class A { @Deprecated @SuppressWarnings(\"all\") void old(){} }");
+        QCOMPARE(ci.methods.size(), 1);
+        QCOMPARE(ci.methods[0].name, QString("old"));
+    }
+
+    // 10-8 Вложенный класс
+    void t18_nestedClass() {
+        PARSE_FIRST("class Outer { class Inner {} }");
+        QCOMPARE(ci.nestedClasses.size(), 1);
+        QCOMPARE(ci.nestedClasses[0].name, QString("Inner"));
+        QCOMPARE(ci.nestedClasses[0].outerClass, QString("Outer"));
+    }
+
+    // 10-9 Вложенный интерфейс
+    void t19_nestedInterface() {
+        PARSE_FIRST("class A { interface Callback { void call(); } }");
+        QCOMPARE(ci.nestedClasses.size(), 1);
+        QCOMPARE(ci.nestedClasses[0].type, ClassType::INTERFACE);
+        QCOMPARE(ci.nestedClasses[0].name, QString("Callback"));
+    }
+
+    // 10-10 Вложенное перечисление
+    void t110_nestedEnum() {
+        PARSE_FIRST("class A { enum State { ON, OFF } }");
+        QCOMPARE(ci.nestedClasses.size(), 1);
+        QCOMPARE(ci.nestedClasses[0].type, ClassType::ENUM);
+        QVERIFY(ci.nestedClasses[0].enumConstants.contains("ON"));
+    }
+
+    // 10-11 Статический инициализатор { } пропускается
+    void t111_staticInitializerSkipped() {
+        PARSE_FIRST("class A { static { int tmp = 0; } int x; }");
+        QCOMPARE(ci.fields.size(), 1);
+        QCOMPARE(ci.fields[0].name, QString("x"));
+    }
+
+    // 10-12 Аннотация перед модификатором, затем поле
+    void t112_annotationBeforeModifierField() {
+        PARSE_FIRST("class A { @NotNull private String label; }");
+        QCOMPARE(ci.fields.size(), 1);
+        QCOMPARE(ci.fields[0].type, QString("String"));
+        QCOMPARE(ci.fields[0].name, QString("label"));
+        QVERIFY(ci.fields[0].modifiers.contains("private"));
+    }
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// Приложение 11. Parser::parseEnumMembers()
+// ════════════════════════════════════════════════════════════════════════════
+class TestParseEnumMembers : public QObject
+{
+    Q_OBJECT
+private slots:
+
+    // 11-1 Константы без членов — parseEnumMembers не вызывается
+    void t11_noMembersSection() {
+        PARSE_FIRST("enum Color { RED, GREEN, BLUE }");
+        QCOMPARE(ci.enumConstants.size(), 3);
+        QVERIFY(ci.fields.isEmpty());
+        QVERIFY(ci.methods.isEmpty());
+    }
+
+    // 11-2 Одно поле после ;
+    void t12_singleFieldAfterSemicolon() {
+        PARSE_FIRST("enum A { X; int code; }");
+        QVERIFY(ci.enumConstants.contains("X"));
+        QCOMPARE(ci.fields.size(), 1);
+        QCOMPARE(ci.fields[0].name, QString("code"));
+        QCOMPARE(ci.fields[0].type, QString("int"));
+    }
+
+    // 11-3 Один метод после ;
+    void t13_singleMethodAfterSemicolon() {
+        PARSE_FIRST("enum A { X; void run(){} }");
+        QVERIFY(ci.enumConstants.contains("X"));
+        QCOMPARE(ci.methods.size(), 1);
+        QCOMPARE(ci.methods[0].name, QString("run"));
+    }
+
+    // 11-4 Поле и метод после ;
+    void t14_fieldAndMethodAfterSemicolon() {
+        PARSE_FIRST("enum A { X; int code; void reset(){} }");
+        QCOMPARE(ci.fields.size(), 1);
+        QCOMPARE(ci.methods.size(), 1);
+    }
+
+    // 11-5 static поле после ;
+    void t15_staticField() {
+        PARSE_FIRST("enum A { X; static int count; }");
+        QVERIFY(ci.fields[0].isStatic);
+        QCOMPARE(ci.fields[0].name, QString("count"));
+    }
+
+    // 11-6 final поле после ;
+    void t16_finalField() {
+        PARSE_FIRST("enum A { X; final int MAX = 10; }");
+        QVERIFY(ci.fields[0].isFinal);
+        QCOMPARE(ci.fields[0].name, QString("MAX"));
+    }
+
+    // 11-7 Метод с модификатором после ;
+    void t17_publicMethodAfterSemicolon() {
+        PARSE_FIRST("enum A { X; public String label(){} }");
+        QVERIFY(ci.methods[0].modifiers.contains("public"));
+        QCOMPARE(ci.methods[0].returnType, QString("String"));
+    }
+
+    // 11-8 Вложенный класс после ;
+    void t18_nestedClassAfterSemicolon() {
+        PARSE_FIRST("enum A { X; class Helper {} }");
+        QVERIFY(ci.enumConstants.contains("X"));
+        QCOMPARE(ci.nestedClasses.size(), 1);
+        QCOMPARE(ci.nestedClasses[0].name, QString("Helper"));
+    }
+
+    // 11-9 Несколько констант, затем несколько членов
+    void t19_multipleConstantsAndMembers() {
+        PARSE_FIRST("enum Planet { EARTH, MARS; double mass; double radius; }");
+        QCOMPARE(ci.enumConstants.size(), 2);
+        QCOMPARE(ci.fields.size(), 2);
+    }
+
+    // 11-10 Конструктор перечисления после ;
+    void t110_enumConstructor() {
+        PARSE_FIRST("enum A { X; A(){} }");
+        QVERIFY(ci.enumConstants.contains("X"));
+        QCOMPARE(ci.constructors.size(), 1);
+        QCOMPARE(ci.constructors[0].name, QString("A"));
+    }
+
+    // 11-11 Метод с параметрами после ;
+    void t111_methodWithParams() {
+        PARSE_FIRST("enum A { X; void init(int code, String label){} }");
+        QCOMPARE(ci.methods[0].params.size(), 2);
+        QCOMPARE(ci.methods[0].params[0].type, QString("int"));
+        QCOMPARE(ci.methods[0].params[1].type, QString("String"));
+    }
+
 };
 
 int main(int argc, char *argv[])
@@ -1086,6 +1394,8 @@ int main(int argc, char *argv[])
     run(new TestParseParams);
     run(new TestParseEnum);
     run(new TestParse);
+    run(new TestParseClassBody);
+    run(new TestParseEnumMembers);
 
     return status;
 }
