@@ -19,6 +19,7 @@ bool Parser::isClassKeyword(const QString &w)
 
 bool Parser::isModifier(const QString &w)
 {
+    // Список возможных модификаторов
     static const QStringList mods = {
         "public", "private", "protected",
         "static", "final", "abstract",
@@ -326,12 +327,6 @@ FieldInfo Parser::parseField(const QStringList &modifiers,
     // 4. ЕСЛИ среди модификаторов "final"
     fi.isFinal = modifiers.contains("final");
 
-    // 5. ПОКА следующий символ [
-    while (peekChar() == '[') {
-        readWord(); // "["
-        readWord(); // "]"
-        fi.type += "[]";
-    }
 
     // 6. ЕСЛИ следующий символ =
     if (peekChar() == '=') {
@@ -515,14 +510,17 @@ void Parser::skipAnnotation()
 
 void Parser::skipQuotedLiteral(QChar terminator)
 {
+     // Идём по символам, пока не достигнем конца текста
     while (!atEnd()) {
         QChar c = m_text[m_pos++];
 
+        // Экранированный символ: пропускаем следующий символ (он не является закрывающей кавычкой)
         if (c == '\\') {
             if (!atEnd())
                 ++m_pos;
         }
         else if (c == terminator) {
+            // Нашли закрывающую кавычку — завершаем пропуск
             return;
         }
     }
@@ -618,7 +616,8 @@ void Parser::skipLineComment(int &pos) const
 
 void Parser::skipBlockComment(int &pos) const
 {
-    // Пропуск многострочного комментария
+    // Пропускает многострочный комментарий (/* ... */).
+    // Предполагается, что текущая позиция уже после "/*".
     while (pos < m_text.size()) {
         if (pos + 1 < m_text.size() &&
             m_text[pos] == '*' &&
@@ -651,24 +650,28 @@ bool Parser::isBlockComment(int pos) const
 void Parser::skipIgnored()
 {
     for (;;) {
-
+        // Пропускаем все пробельные символы в начале
         skipSpaces();
 
+         // Если достигнут конец текста, выходим
         if (atEnd())
             return;
 
+         // Проверяем, начинается ли с текущей позиции однострочный комментарий "//"
         if (isLineComment(m_pos)) {
             m_pos += 2;
             skipLineComment();
             continue;
         }
 
+        // Проверяем, начинается ли многострочный комментарий "/*"
         if (isBlockComment(m_pos)) {
             m_pos += 2;
             skipBlockComment();
             continue;
         }
 
+        // Если ни пробелов, ни комментариев — значит достигнут значимый символ, выходим
         return;
     }
 }
@@ -700,20 +703,26 @@ bool Parser::readVarArgs()
 
 void Parser::parseEnumMembers(ClassInfo &ci)
 {
+    // Читаем члены перечисления до тех пор, пока не встретим закрывающую '}'
     while (peekWord() != "}" && !atEnd()) {
 
+        // Собираем все модификаторы (public, static, final и т.д.), которые могут предшествовать члену
         QStringList mods;
 
         while (isModifier(peekWord()))
             mods << readWord();
 
+        // Смотрим на следующий токен без его извлечения
         QString peek = peekWord();
 
         if (peek.isEmpty() || peek == "}")
             break;
 
+        // Если следующий токен — ключевое слово класса (class, interface, enum),
+        // значит это вложенное объявление, парсим его как отдельный класс
         if (isClassKeyword(peek))
             ci.nestedClasses << parseClass(mods, ci.name);
+        // Иначе — обычный член перечисления (константа, метод и т.п.)
         else
             parseMember(ci, mods);
     }
