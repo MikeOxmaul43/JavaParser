@@ -29,7 +29,7 @@ enum class ClassType
 struct ClassInfo
 {
     QString name;
-    ClassType type;
+    ClassType type = ClassType::CLASS;
     QString packageName;
     QString outerClass;
     QStringList modifiers;
