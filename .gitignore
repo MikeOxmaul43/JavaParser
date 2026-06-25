@@ -6,3 +6,7 @@ CMakeLists.txt.user
 temp/
 compile_commands.json
 tests/integration/outputs/
+todo.md
+build-coverage/
+run_tests.bat
+coverage/
