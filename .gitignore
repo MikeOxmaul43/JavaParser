@@ -10,3 +10,4 @@ todo.md
 build-coverage/
 run_tests.bat
 coverage/
+logs/
