@@ -10,18 +10,25 @@ QString errorMessage(AppError e) {
     switch (e) {
     case AppError::LineTooLong:
         result = "Превышена максимально допустимая длина строки (1024 символа).";
+        break;
     case AppError::TooManyLines:
         result = "Превышено максимально допустимое количество строк входного файла (10000).";
+        break;
     case AppError::BadArgCount:
         result = "Недостаточно параметров командной строки. Укажите путь к входному файлу и выходной директории.";
+        break;
     case AppError::FileNotFound:
         result = "Неверно указан входной файл. Проверьте, что файл существует.";
+        break;
     case AppError::FileNoAccess:
         result = "Нет доступа к входному файлу.";
+        break;
     case AppError::FileEmpty:
         result = "Входной файл пуст. Отсутствуют данные для анализа.";
+        break;
     case AppError::TooManyArgs:
         result = "Неверное количество параметров командной строки. Ожидается два параметра.";
+        break;
     }
     //Если ошибка не найденна - пустая строка
     return result;

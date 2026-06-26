@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     if (!errors.isEmpty()) {
         for (AppError e: errors)
             qCritical().noquote() << errorMessage(e);
-            return 1;
+        return 1;
     }
 
     Parser parser;
